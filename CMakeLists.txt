@@ -333,3 +333,46 @@ if(NOT WIN32 OR NOT CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/catch.pc DESTINATION ${PKGCONFIG_INSTALL_DIR})
 
 endif()
+
+add_library(Catch INTERFACE)
+
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+set(include_install_dir "include")
+set(config_install_dir "lib/cmake/Catch")
+
+set(version_config "${generated_dir}/CatchConfigVersion.cmake")
+set(project_config "${generated_dir}/CatchConfig.cmake")
+set(targets_export_name "CatchTargets")
+set(namespace "Catch::")
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${version_config}" 
+    COMPATIBILITY SameMajorVersion
+    VERSION ${CATCH_VERSION_NUMBER}
+)
+
+configure_file("cmake/Config.cmake.in" "${project_config}" @ONLY)
+
+install(
+    TARGETS Catch
+    EXPORT "${targets_export_name}"
+    INCLUDES DESTINATION "${include_install_dir}"
+)
+
+install(
+    FILES "single_include/catch.hpp"
+    DESTINATION "${include_install_dir}"
+)
+
+install(
+    FILES "${project_config}" "${version_config}"
+    DESTINATION "${config_install_dir}"
+)
+
+install(
+    EXPORT "${targets_export_name}"
+    NAMESPACE "${namespace}"
+    DESTINATION "${config_install_dir}"
+)
