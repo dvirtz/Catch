@@ -1,4 +1,1 @@
 include("${CMAKE_CURRENT_LIST_DIR}/@targets_export_name@.cmake")
-
-get_property(CATCH_INCLUDE_DIR TARGET Catch::Catch PROPERTY 
-    INTERFACE_INCLUDE_DIRECTORIES)
