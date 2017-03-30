@@ -1,7 +1,18 @@
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-CatchSelfTest is a <version> host application.
+<exe-name> is a <version> host application.
 Run with -? for options
+
+-------------------------------------------------------------------------------
+#835 -- errno should not be touched by Catch
+-------------------------------------------------------------------------------
+MiscTests.cpp:<line number>
+...............................................................................
+
+MiscTests.cpp:<line number>: FAILED:
+  CHECK( f() == 0 )
+with expansion:
+  1 == 0
 
 -------------------------------------------------------------------------------
 'Not' checks that should fail
@@ -105,10 +116,10 @@ due to unexpected exception with message:
 -------------------------------------------------------------------------------
 Contains string matcher
 -------------------------------------------------------------------------------
-MiscTests.cpp:<line number>
+MatchersTests.cpp:<line number>
 ...............................................................................
 
-MiscTests.cpp:<line number>: FAILED:
+MatchersTests.cpp:<line number>: FAILED:
   CHECK_THAT( testStringForMatching(), Contains( "not there" ) )
 with expansion:
   "this string contains 'abc' as a substring" contains: "not there"
@@ -131,7 +142,7 @@ ExceptionTests.cpp:<line number>
 ...............................................................................
 
 ExceptionTests.cpp:<line number>: FAILED:
-  REQUIRE_THROWS_AS( throwCustom() )
+  REQUIRE_THROWS_AS( throwCustom(), std::exception )
 due to unexpected exception with message:
   custom exception - not std
 
@@ -148,10 +159,10 @@ due to unexpected exception with message:
 -------------------------------------------------------------------------------
 EndsWith string matcher
 -------------------------------------------------------------------------------
-MiscTests.cpp:<line number>
+MatchersTests.cpp:<line number>
 ...............................................................................
 
-MiscTests.cpp:<line number>: FAILED:
+MatchersTests.cpp:<line number>: FAILED:
   CHECK_THAT( testStringForMatching(), EndsWith( "this" ) )
 with expansion:
   "this string contains 'abc' as a substring" ends with: "this"
@@ -230,10 +241,10 @@ with expansion:
 -------------------------------------------------------------------------------
 Equals string matcher
 -------------------------------------------------------------------------------
-MiscTests.cpp:<line number>
+MatchersTests.cpp:<line number>
 ...............................................................................
 
-MiscTests.cpp:<line number>: FAILED:
+MatchersTests.cpp:<line number>: FAILED:
   CHECK_THAT( testStringForMatching(), Equals( "something else" ) )
 with expansion:
   "this string contains 'abc' as a substring" equals: "something else"
@@ -245,12 +256,12 @@ ExceptionTests.cpp:<line number>
 ...............................................................................
 
 ExceptionTests.cpp:<line number>: FAILED:
-  CHECK_THROWS_AS( thisThrows() )
+  CHECK_THROWS_AS( thisThrows(), std::string )
 due to unexpected exception with message:
   expected exception
 
 ExceptionTests.cpp:<line number>: FAILED:
-  CHECK_THROWS_AS( thisDoesntThrow() )
+  CHECK_THROWS_AS( thisDoesntThrow(), std::domain_error )
 because no exception was thrown where one was expected:
 
 ExceptionTests.cpp:<line number>: FAILED:
@@ -275,6 +286,20 @@ MessageTests.cpp:<line number>
 ...............................................................................
 
 MessageTests.cpp:<line number>: FAILED:
+
+-------------------------------------------------------------------------------
+FAIL_CHECK does not abort the test
+-------------------------------------------------------------------------------
+MessageTests.cpp:<line number>
+...............................................................................
+
+MessageTests.cpp:<line number>: FAILED:
+explicitly with message:
+  This is a failure
+
+MessageTests.cpp:<line number>:
+warning:
+  This message appears in the output
 
 -------------------------------------------------------------------------------
 INFO and WARN do not abort tests
@@ -355,10 +380,10 @@ with expansion:
 -------------------------------------------------------------------------------
 Matchers can be composed with both && and || - failing
 -------------------------------------------------------------------------------
-MiscTests.cpp:<line number>
+MatchersTests.cpp:<line number>
 ...............................................................................
 
-MiscTests.cpp:<line number>: FAILED:
+MatchersTests.cpp:<line number>: FAILED:
   CHECK_THAT( testStringForMatching(), ( Contains( "string" ) || Contains( "different" ) ) && Contains( "random" ) )
 with expansion:
   "this string contains 'abc' as a substring" ( ( contains: "string" or
@@ -367,10 +392,10 @@ with expansion:
 -------------------------------------------------------------------------------
 Matchers can be negated (Not) with the ! operator - failing
 -------------------------------------------------------------------------------
-MiscTests.cpp:<line number>
+MatchersTests.cpp:<line number>
 ...............................................................................
 
-MiscTests.cpp:<line number>: FAILED:
+MatchersTests.cpp:<line number>: FAILED:
   CHECK_THAT( testStringForMatching(), !Contains( "substring" ) )
 with expansion:
   "this string contains 'abc' as a substring" not contains: "substring"
@@ -564,10 +589,10 @@ Message from section two
 -------------------------------------------------------------------------------
 StartsWith string matcher
 -------------------------------------------------------------------------------
-MiscTests.cpp:<line number>
+MatchersTests.cpp:<line number>
 ...............................................................................
 
-MiscTests.cpp:<line number>: FAILED:
+MatchersTests.cpp:<line number>: FAILED:
   CHECK_THAT( testStringForMatching(), StartsWith( "string" ) )
 with expansion:
   "this string contains 'abc' as a substring" starts with: "string"
@@ -584,11 +609,11 @@ MiscTests.cpp:<line number>: FAILED:
   CHECK( s1 == s2 )
 with expansion:
   "if ($b == 10) {
-  		$a= 20;
+  		$a	= 20;
   }"
   ==
   "if ($b == 10) {
-  $a = 20;
+  	$a = 20;
   }
   "
 
@@ -603,6 +628,67 @@ due to unexpected exception with message:
   3.14
 
 -------------------------------------------------------------------------------
+Vector matchers that fail
+  Contains (element)
+-------------------------------------------------------------------------------
+MatchersTests.cpp:<line number>
+...............................................................................
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( v, VectorContains( -1 ) )
+with expansion:
+  { 1, 2, 3 } Contains: -1
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( empty, VectorContains( 1 ) )
+with expansion:
+  {  } Contains: 1
+
+-------------------------------------------------------------------------------
+Vector matchers that fail
+  Contains (vector)
+-------------------------------------------------------------------------------
+MatchersTests.cpp:<line number>
+...............................................................................
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( empty, Contains( v) )
+with expansion:
+  {  } Contains: { 1, 2, 3 }
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( v, Contains( v2 ) )
+with expansion:
+  { 1, 2, 3 } Contains: { 1, 2, 4 }
+
+-------------------------------------------------------------------------------
+Vector matchers that fail
+  Equals
+-------------------------------------------------------------------------------
+MatchersTests.cpp:<line number>
+...............................................................................
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( v, Equals( v2 ) )
+with expansion:
+  { 1, 2, 3 } Equals: { 1, 2 }
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( v2, Equals( v ) )
+with expansion:
+  { 1, 2 } Equals: { 1, 2, 3 }
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( empty, Equals( v ) )
+with expansion:
+  {  } Equals: { 1, 2, 3 }
+
+MatchersTests.cpp:<line number>: FAILED:
+  CHECK_THAT( v, Equals( empty ) )
+with expansion:
+  { 1, 2, 3 } Equals: {  }
+
+-------------------------------------------------------------------------------
 When unchecked exceptions are thrown directly they are always failures
 -------------------------------------------------------------------------------
 ExceptionTests.cpp:<line number>
@@ -613,8 +699,7 @@ due to unexpected exception with message:
   unexpected exception
 
 -------------------------------------------------------------------------------
-When unchecked exceptions are thrown during a CHECK the test should abort and
-fail
+When unchecked exceptions are thrown during a CHECK the test should continue
 -------------------------------------------------------------------------------
 ExceptionTests.cpp:<line number>
 ...............................................................................
@@ -712,7 +797,7 @@ MiscTests.cpp:<line number>: FAILED:
 with expansion:
   false
 
--------------------------------------------------------------------------------
+spanner-------------------------------------------------------------------------------
 just failure
 -------------------------------------------------------------------------------
 MessageTests.cpp:<line number>
@@ -830,6 +915,6 @@ with expansion:
   "first" == "second"
 
 ===============================================================================
-test cases: 169 | 125 passed | 42 failed |  2 failed as expected
-assertions: 921 | 825 passed | 78 failed | 18 failed as expected
+test cases: 166 | 119 passed | 44 failed |  3 failed as expected
+assertions: 961 | 855 passed | 87 failed | 19 failed as expected
 
